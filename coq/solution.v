@@ -44,38 +44,18 @@ Proof.
   - apply Hind. apply IHp.
 Qed.
 
-Inductive action' (n : state) : state -> Prop :=
-  | mkaction : forall k, k < 10 -> action' n (n + S k).
-
-Lemma action_action' : forall n m,
-  action n m <-> action' m n.
-Proof.
-intros. split; intros.
-- inversion H. clear H. subst.
-  rewrite (le_plus_minus m n).
-  pose proof (mkaction m (pred (n - m))).
-  assert (n - m <> 0).
-  unfold not. intros. omega.
-  rewrite succ_pred in H by assumption. apply H.
-  unfold "<". rewrite succ_pred by assumption.
-  assumption. apply lt_le_weak.
-  apply lt_O_minus_lt. assumption.
-- induction H. econstructor; omega.
-Qed.
-
 Lemma LoseFrom0 : LoseFrom 0.
 Proof.
-econstructor.
-intros. rewrite action_action' in H.
-inversion H. omega.
+  econstructor.
+  inversion 1.
+  omega.
 Qed.
 
 Lemma WinFrom_n : forall n k x, x = n + S k -> LoseFrom n -> k < 10 -> WinFrom x.
 Proof.
 intros. subst.
 econstructor. 2:eassumption.
-apply action_action'.
-constructor. assumption.
+constructor; omega.
 Qed.
 
 Lemma LoseFrom_n : forall n, LoseFrom n -> LoseFrom (11 + n).
