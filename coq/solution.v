@@ -53,22 +53,22 @@ Qed.
 
 Lemma WinFrom_n : forall n k x, x = n + S k -> LoseFrom n -> k < 10 -> WinFrom x.
 Proof.
-intros. subst.
-econstructor. 2:eassumption.
-constructor; omega.
+  intros. subst.
+  econstructor. 2:eassumption.
+  constructor; omega.
 Qed.
 
 Lemma LoseFrom_n : forall n, LoseFrom n -> LoseFrom (11 + n).
 Proof.
-intros.
-constructor.
-intros.
-inversion H0; subst.
-eapply WinFrom_n.
-2: eauto.
-instantiate (1 := n' - n - 1).
-omega.
-omega.
+  intros.
+  constructor.
+  intros.
+  inversion H0; subst.
+  eapply WinFrom_n.
+  2: eauto.
+  instantiate (1 := n' - n - 1).
+  omega.
+  omega.
 Qed.
 
 Theorem solution_all : forall n,
@@ -104,5 +104,5 @@ Qed.
 
 Theorem solution : WinFrom 100.
 Proof.
-apply (solution_all 100).
+  apply (solution_all 100).
 Qed.

@@ -8,7 +8,7 @@
     <a href="coq/problem.v">Download the Coq source!</a>
     #
 
-*)
+ *)
 
 (** A "state" is a natural number representing how much
     remains between the current sum and the total (which
@@ -48,5 +48,5 @@ Definition Puzzle : Type := WinFrom total + LoseFrom total.
 
 Theorem PuzzleSolution : Puzzle.
 Proof.
-unfold Puzzle.
+  unfold Puzzle.
 Abort.
