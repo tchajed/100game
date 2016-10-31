@@ -1,7 +1,7 @@
 (** * Puzzle: The Sum Game *)
 
-(** Consider the following game: two players take turns adding a 
-    number from 1-10 to a shared sum. The player who makes the 
+(** Consider the following game: two players take turns adding a
+    number from 1-10 to a shared sum. The player who makes the
     sum 100 wins. Who wins, and how?
 
     #
@@ -9,9 +9,6 @@
     #
 
 *)
-
-Require Import Omega Arith.
-Import PeanoNat.Nat.
 
 (** A "state" is a natural number representing how much
     remains between the current sum and the total (which

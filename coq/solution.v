@@ -1,9 +1,6 @@
-Require Import 
-  Arith
-  Omega
-  problem.
+Require Import problem.
+Require Import Arith Omega.
 Import PeanoNat.Nat.
-
 
 Definition pre_strategy :=
   state -> {m | m < 10}.
@@ -26,38 +23,7 @@ Defined.
 
 Definition winning_strategy := strategy winning_pre_strategy.
 
-Lemma mod_div_0 : forall n k,
-    k <> 0 ->
-    n mod k / k = 0.
-Proof.
-  intros.
-  pose proof (mod_upper_bound n k); intuition.
-  apply div_small; auto.
-Qed.
-
 Theorem mod_principle k (Heq0: k <> 0) :
-  forall (P: nat -> Prop)
-    (Hsmall: forall n, n < k -> P n)
-    (Hind: forall n, P n -> P (k + n)),
-    (forall n, P n).
-Proof.
-  intros.
-  pose proof (div_mod n k ltac:(auto)).
-  remember (n / k) as p. remember (n mod k) as r.
-  rewrite H.
-  pose proof (mod_upper_bound n k ltac:(assumption)).
-  rewrite <- Heqr in H0.
-  clear n H Heqp Heqr.
-  induction p.
-  - rewrite mul_0_r in *; simpl in *.
-    auto.
-  - rewrite mul_comm; simpl.
-    rewrite <- plus_assoc.
-    apply Hind.
-    rewrite mul_comm. assumption.
-Qed.
-
-Theorem mod_principle' k (Heq0: k <> 0) :
   forall (P: nat -> Prop)
     (Hsmall: forall n, n < k -> P n)
     (Hind: forall p, (forall n, n < k -> P (k *   p + n)) ->
@@ -100,7 +66,7 @@ Qed.
 Lemma LoseFrom0 : LoseFrom 0.
 Proof.
 econstructor.
-intros. rewrite action_action' in H. 
+intros. rewrite action_action' in H.
 inversion H. omega.
 Qed.
 
@@ -116,8 +82,8 @@ Lemma LoseFrom_n : forall n, LoseFrom n -> LoseFrom (11 + n).
 Proof.
 intros.
 constructor.
-intros. 
-inversion H0; subst.      
+intros.
+inversion H0; subst.
 eapply WinFrom_n.
 2: eauto.
 instantiate (1 := n' - n - 1).
@@ -132,22 +98,22 @@ Theorem solution_all : forall n,
     end.
 Proof.
   intros.
-  induction n using (mod_principle' 11 ltac:(omega)).
+  induction n using (mod_principle 11 ltac:(omega)).
   - rewrite mod_small by auto.
     destruct n.
     + apply LoseFrom0.
-    + eapply WinFrom_n with 0 n. reflexivity. 
-      apply LoseFrom0. omega. 
+    + eapply WinFrom_n with 0 n. reflexivity.
+      apply LoseFrom0. omega.
   - assert (forall p x, x < 11 -> (11 * p + x) mod 11 = x).
     intros. rewrite (plus_comm _ x).
-    rewrite (mul_comm 11). 
+    rewrite (mul_comm 11).
     rewrite mod_add by omega.
     rewrite mod_small by assumption. reflexivity.
     rewrite H1 by assumption. destruct n2.
     + specialize (H 0 ltac:(omega)).
       rewrite H1 in H by omega.
       rewrite plus_0_r in *.
-      rewrite mul_comm. rewrite mul_comm in H. apply LoseFrom_n. apply H. 
+      rewrite mul_comm. rewrite mul_comm in H. apply LoseFrom_n. apply H.
     + specialize (H 0 ltac:(omega)).
       rewrite H1 in H by omega.
       rewrite plus_0_r in H.
