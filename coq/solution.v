@@ -44,31 +44,67 @@ Proof.
   - apply Hind. apply IHp.
 Qed.
 
+Hint Constructors LoseFrom WinFrom.
+Hint Constructors validDiff.
+
+Lemma action_def : forall n n',
+    1 <= n - n' ->
+    n - n' <= 10 ->
+    action n n'.
+Proof.
+  unfold action; eauto.
+Qed.
+
+Hint Resolve action_def.
+
+Hint Extern 3 (_ <= _) => omega.
+
 Lemma LoseFrom0 : LoseFrom 0.
 Proof.
-  econstructor.
+  constructor.
   inversion 1.
   omega.
 Qed.
 
-Lemma WinFrom_n : forall n k x, x = n + S k -> LoseFrom n -> k < 10 -> WinFrom x.
+Lemma WinFrom_n : forall n,
+    LoseFrom n ->
+    forall n' k,
+      n' = n + S k ->
+      k < 10 ->
+      WinFrom n'.
 Proof.
   intros. subst.
-  econstructor. 2:eassumption.
-  constructor; omega.
+  econstructor; eauto.
+  eauto.
 Qed.
 
-Lemma LoseFrom_n : forall n, LoseFrom n -> LoseFrom (11 + n).
+Ltac winfrom_n :=
+  match goal with
+  | [ H: LoseFrom ?n |- WinFrom ?n' ] =>
+    apply (WinFrom_n _ H n' (n' - n - 1)); try omega
+  end.
+
+Lemma LoseFrom_n : forall n,
+    LoseFrom n ->
+    forall m, 11 + n = m ->
+    LoseFrom m.
+Proof.
+  intros; subst.
+  constructor; intros.
+  inversion H0; subst.
+  winfrom_n.
+Qed.
+
+Lemma mod_add_rem : forall k n r,
+    k <> 0 ->
+    r < k ->
+    (k * n + r) mod k = r.
 Proof.
   intros.
-  constructor.
-  intros.
-  inversion H0; subst.
-  eapply WinFrom_n.
-  2: eauto.
-  instantiate (1 := n' - n - 1).
-  omega.
-  omega.
+  rewrite plus_comm.
+  rewrite mul_comm.
+  rewrite mod_add by auto.
+  apply mod_small; auto.
 Qed.
 
 Theorem solution_all : forall n,
@@ -82,24 +118,17 @@ Proof.
   - rewrite mod_small by auto.
     destruct n.
     + apply LoseFrom0.
-    + eapply WinFrom_n with 0 n. reflexivity.
-      apply LoseFrom0. omega.
-  - assert (forall p x, x < 11 -> (11 * p + x) mod 11 = x).
-    intros. rewrite (plus_comm _ x).
-    rewrite (mul_comm 11).
-    rewrite mod_add by omega.
-    rewrite mod_small by assumption. reflexivity.
-    rewrite H1 by assumption. destruct n2.
+    + pose proof LoseFrom0.
+      winfrom_n.
+  - rewrite mod_add_rem by omega. destruct n2.
+    + specialize (H 0 ltac:(auto)).
+      rewrite mod_add_rem in H by omega.
+      eapply LoseFrom_n; eauto.
+      omega.
     + specialize (H 0 ltac:(omega)).
-      rewrite H1 in H by omega.
-      rewrite plus_0_r in *.
-      rewrite mul_comm. rewrite mul_comm in H. apply LoseFrom_n. apply H.
-    + specialize (H 0 ltac:(omega)).
-      rewrite H1 in H by omega.
-      rewrite plus_0_r in H.
-      apply LoseFrom_n in H.
-      eapply WinFrom_n. 2:eassumption.
-      instantiate (1 := n2). omega. omega.
+      rewrite mod_add_rem in H by omega.
+      eapply LoseFrom_n in H; eauto.
+      winfrom_n.
 Qed.
 
 Theorem solution : WinFrom 100.
