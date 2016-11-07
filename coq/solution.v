@@ -1,3 +1,31 @@
+(** * Solution: The Sum Game *)
+
+(** Suppose that the amount remaining before the cumulative sum is reached
+    is [n]. Then if [n] is divisible by 11, the player who is next must lose,
+    while if [n] is not divisible by 11, the player who is next must win.
+    Since 100 is not divisible by 11, the player who is next wins.
+
+    - If [n] is 0, the player who is next loses, by definition.
+
+    - If the player who is next loses from [n], then the player who is
+      next wins from [n + r] for any [r] between 1 and 10.
+
+    - As a result, if the player who is next loses from [n], the player
+      who is next also loses from [n + 11], since no matter what move
+      the player makes, the opposing player can subtract a complementary
+      amount to bring the state to [n].
+
+    Using these facts, we can prove the goal in an inductive manner.
+    Noting that [n] can be written as the product [p * 11 + r], where
+    [r] is between 0 and 10, the proof proceeds by induction on [p].
+
+    #
+    <a href="coq/">Download the Coq source!</a>
+    #
+
+    *)
+
+
 Require Import problem.
 Require Import Arith Omega.
 Import PeanoNat.Nat.
@@ -59,6 +87,7 @@ Hint Resolve action_def.
 
 Hint Extern 3 (_ <= _) => omega.
 
+(** If [n] is 0, the player who is next loses, by definition. *)
 Lemma LoseFrom0 : LoseFrom 0.
 Proof.
   constructor.
@@ -66,6 +95,8 @@ Proof.
   omega.
 Qed.
 
+(** If the player who is next loses from [n], then the player who is
+    next wins from [n + r] for any [r] between 1 and 10. *)
 Lemma WinFrom_n : forall n,
     LoseFrom n ->
     forall n' k,
@@ -84,6 +115,10 @@ Ltac winfrom_n :=
     apply (WinFrom_n _ H n' (n' - n - 1)); try omega
   end.
 
+(** As a result, if the player who is next loses from [n], the player
+    who is next also loses from [n + 11], since no matter what move
+    the player makes, the opposing player can subtract a complementary
+    amount to bring the state to [n]. *)
 Lemma LoseFrom_n : forall n,
     LoseFrom n ->
     forall m, 11 + n = m ->
@@ -107,6 +142,8 @@ Proof.
   apply mod_small; auto.
 Qed.
 
+(** Then if [n] is divisible by 11, the player who is next must lose,
+    while if [n] is not divisible by 11, the player who is next must win. *)
 Theorem solution_all : forall n,
     match n mod 11 with
     | 0 => LoseFrom n
@@ -131,6 +168,7 @@ Proof.
       winfrom_n.
 Qed.
 
+(** Since 100 is not divisible by 11, the player who is next wins. *)
 Theorem solution : WinFrom 100.
 Proof.
   apply (solution_all 100).
